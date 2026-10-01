@@ -1,0 +1,479 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 1. Users
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         String    @default("CUSTOMER") // CUSTOMER | ADMIN
+  phone        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  profile           Profile?
+  addresses         Address[]
+  orders            Order[]
+  cart              Cart?
+  wishlist          Wishlist?
+  reviews           Review[]
+  aiConversations   AIConversation[]
+  aiDesigns         AIDesign[]
+  recommendations   Recommendation[]
+  notifications     Notification[]
+
+  @@map("users")
+}
+
+// 2. Profiles
+model Profile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  avatarUrl        String?
+  bio              String?
+  preferredSize    String?
+  childAge         Int?
+  childGender      String?  @default("female")
+  measurementsJson String?  // JSON string of chest, waist, shoulder-to-hem etc.
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("profiles")
+}
+
+// 3. Categories
+model Category {
+  id           String    @id @default(cuid())
+  name         String    @unique
+  slug         String    @unique
+  description  String?
+  image        String?
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  products     Product[]
+
+  @@map("categories")
+}
+
+// 4. Products
+model Product {
+  id               String    @id @default(cuid())
+  name             String
+  slug             String    @unique
+  description      String
+  shortDescription String?
+  price            Float
+  discountPrice    Float?
+  categoryId       String
+  category         Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  availableSizes   String    // Comma-separated or JSON e.g. "2-3Y, 3-4Y, 4-5Y, 5-6Y"
+  ageRange         String    @default("3-5 Years")
+  colors           String    // Comma-separated e.g. "Dusty Rose, Muted Gold"
+  fabric           String    // e.g. "Raw Silk & Organza"
+  occasion         String    // e.g. "Eid, Wedding, Birthday"
+  style            String    // e.g. "Traditional Anarkali Frock"
+  stockQuantity    Int       @default(10)
+  sku              String    @unique
+  tags             String?   // Comma-separated keywords
+  isFeatured       Boolean   @default(false)
+  isNewArrival     Boolean   @default(false)
+  isCustomizable   Boolean   @default(true)
+  images           String    // JSON array string of image URLs
+  rating           Float     @default(5.0)
+  reviewCount      Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  productImages    ProductImage[]
+  variants         ProductVariant[]
+  productTags      ProductTag[]
+  inventoryItems   Inventory[]
+  cartItems        CartItem[]
+  wishlistItems    WishlistItem[]
+  orderItems       OrderItem[]
+  reviews          Review[]
+
+  @@index([categoryId])
+  @@index([isFeatured])
+  @@index([isNewArrival])
+  @@map("products")
+}
+
+// 5. Product Images
+model ProductImage {
+  id           String   @id @default(cuid())
+  productId    String
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url          String
+  altText      String?
+  isPrimary    Boolean  @default(false)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+// 6. Product Variants
+model ProductVariant {
+  id            String      @id @default(cuid())
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  size          String
+  color         String?
+  sku           String      @unique
+  price         Float?
+  stockQuantity Int         @default(5)
+
+  cartItems     CartItem[]
+  inventory     Inventory?
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+// 7. Product Tags
+model ProductTag {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag       String
+
+  @@index([productId])
+  @@index([tag])
+  @@map("product_tags")
+}
+
+// 8. Inventory
+model Inventory {
+  id               String          @id @default(cuid())
+  productId        String
+  product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId        String?         @unique
+  variant          ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  quantity         Int             @default(10)
+  reservedQuantity Int             @default(0)
+  reorderLevel     Int             @default(3)
+  updatedAt        DateTime        @updatedAt
+
+  @@index([productId])
+  @@map("inventory")
+}
+
+// 9. Carts
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String?    @unique
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId String?    @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  items     CartItem[]
+
+  @@map("carts")
+}
+
+// 10. Cart Items
+model CartItem {
+  id               String          @id @default(cuid())
+  cartId           String
+  cart             Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId        String
+  product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId        String?
+  variant          ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  quantity         Int             @default(1)
+  selectedSize     String?
+  customColor      String?
+  customFabric     String?
+  customSleeve     String?
+  customNeck       String?
+  customLength     String?
+  customEmbroidery String?
+  customNotes      String?
+  customizationFee Float           @default(0)
+  unitPrice        Float
+  createdAt        DateTime        @default(now())
+
+  @@index([cartId])
+  @@index([productId])
+  @@map("cart_items")
+}
+
+// 11. Wishlists
+model Wishlist {
+  id        String         @id @default(cuid())
+  userId    String         @unique
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  items     WishlistItem[]
+
+  @@map("wishlists")
+}
+
+// 12. Wishlist Items
+model WishlistItem {
+  id         String   @id @default(cuid())
+  wishlistId String
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([wishlistId, productId])
+  @@index([wishlistId])
+  @@map("wishlist_items")
+}
+
+// 13. Addresses
+model Address {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName     String
+  phone        String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  province     String   @default("Punjab")
+  postalCode   String?
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+// 14. Orders
+model Order {
+  id                  String               @id @default(cuid())
+  orderNumber         String               @unique
+  userId              String?
+  user                User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  guestEmail          String?
+  guestPhone          String?
+  status              String               @default("PENDING") // PENDING, CONFIRMED, PROCESSING, CUSTOMIZATION_IN_PROGRESS, READY, SHIPPED, DELIVERED, CANCELLED, REFUNDED
+  subtotal            Float
+  discount            Float                @default(0)
+  shippingFee         Float                @default(0)
+  total               Float
+  currency            String               @default("PKR")
+  paymentMethod       String               @default("COD") // COD | ONLINE | JAZZCASH | EASYPAISA
+  paymentStatus       String               @default("PENDING") // PENDING | PAID | FAILED | REFUNDED
+  shippingAddressJson String               // Full serialized shipping address
+  notes               String?
+  trackingNumber      String?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  orderItems          OrderItem[]
+  payments            Payment[]
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@map("orders")
+}
+
+// 15. Order Items
+model OrderItem {
+  id                   String               @id @default(cuid())
+  orderId              String
+  order                Order                @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId            String?
+  product              Product?             @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName          String
+  productImage         String?
+  price                Float
+  quantity             Int
+  size                 String?
+  color                String?
+  total                Float
+
+  orderCustomization   OrderCustomization?
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+// 16. Order Customizations
+model OrderCustomization {
+  id                 String    @id @default(cuid())
+  orderItemId        String    @unique
+  orderItem          OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  color              String?
+  fabric             String?
+  sleeve             String?
+  neck               String?
+  length             String?
+  embroidery         String?
+  decorativeElements String?
+  notes              String?
+  customPrice        Float     @default(0)
+
+  @@map("order_customizations")
+}
+
+// 17. Payments
+model Payment {
+  id                  String   @id @default(cuid())
+  orderId             String
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount              Float
+  currency            String   @default("PKR")
+  method              String   // COD | CARD | JAZZCASH | EASYPAISA
+  status              String   @default("PENDING") // PENDING | COMPLETED | FAILED | REFUNDED
+  transactionRef      String?
+  gatewayResponseJson String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([orderId])
+  @@map("payments")
+}
+
+// 18. Reviews
+model Review {
+  id                 String   @id @default(cuid())
+  productId          String
+  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userName           String
+  rating             Int      @default(5)
+  comment            String
+  imageUrl           String?
+  isVerifiedPurchase Boolean  @default(true)
+  isApproved         Boolean  @default(true)
+  createdAt          DateTime @default(now())
+
+  @@index([productId])
+  @@index([userId])
+  @@map("reviews")
+}
+
+// 19. Coupons
+model Coupon {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  discountPercent Float?
+  discountAmount Float?
+  minOrderAmount Float     @default(0)
+  maxUses        Int       @default(100)
+  usedCount      Int       @default(0)
+  isActive       Boolean   @default(true)
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([code])
+  @@map("coupons")
+}
+
+// 20. AI Conversations
+model AIConversation {
+  id          String      @id @default(cuid())
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId   String?
+  title       String      @default("DHAAGAÉ Fashion Assistant")
+  contextType String      @default("STYLE_ASSISTANT") // STYLE_ASSISTANT | OUTFIT_RECOMMENDER | PRODUCT_CONTEXT
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  messages    AIMessage[]
+
+  @@index([userId])
+  @@index([sessionId])
+  @@map("ai_conversations")
+}
+
+// 21. AI Messages
+model AIMessage {
+  id             String         @id @default(cuid())
+  conversationId String
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String         // user | assistant | system
+  content        String
+  metadataJson   String?        // Structured recommendations, product cards, filters
+  createdAt      DateTime       @default(now())
+
+  @@index([conversationId])
+  @@map("ai_messages")
+}
+
+// 22. AI Designs
+model AIDesign {
+  id                 String   @id @default(cuid())
+  userId             String?
+  user               User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionId          String?
+  title              String   @default("Bespoke Custom Frock")
+  prompt             String
+  dressType          String
+  mainColor          String
+  secondaryColor     String?
+  sleeveStyle        String?
+  neckStyle          String?
+  length             String?
+  embroidery         String?
+  pattern            String?
+  fabric             String?
+  occasion           String?
+  decorativeElements String?
+  generatedImageUrl  String?
+  suggestedColors    String?  // JSON array of hex/names
+  customizationLevel String   @default("Medium - Hand Embroidered")
+  estimatedPrice     Float    @default(8500)
+  createdAt          DateTime @default(now())
+
+  @@index([userId])
+  @@index([sessionId])
+  @@map("ai_designs")
+}
+
+// 23. Recommendations
+model Recommendation {
+  id                    String   @id @default(cuid())
+  userId                String?
+  user                  User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId             String?
+  promptQuery           String
+  inputFiltersJson      String
+  recommendedProductIds String   // JSON array of product IDs
+  reasoningText         String
+  stylingNotes          String?
+  createdAt             DateTime @default(now())
+
+  @@index([userId])
+  @@map("recommendations")
+}
+
+// 24. Notifications
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("SYSTEM") // ORDER_UPDATE | PAYMENT | SYSTEM | PROMO
+  isRead    Boolean  @default(false)
+  linkUrl   String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
