@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate & next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint src",
     "typecheck": "node --stack-size=4096 ./node_modules/typescript/bin/tsc --noEmit",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
@@ -23,7 +23,7 @@
     "jose": "^6.2.12",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.475.0",
-    "next": "15.2.0",
+    "next": "15.5.27",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^3.0.1"
@@ -36,7 +36,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.2.0",
+    "eslint-config-next": "15.5.27",
     "prisma": "^6.4.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5"
