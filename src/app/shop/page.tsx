@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import type { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import ProductCard from '@/components/ProductCard';
 import ShopFilters from '@/components/ShopFilters';
@@ -23,6 +24,11 @@ interface ShopProps {
     page?: string;
   }>;
 }
+
+type ShopProduct = Prisma.ProductGetPayload<{ include: { category: true } }>;
+type ShopCategory = Prisma.CategoryGetPayload<{
+  select: { id: true; name: true; slug: true };
+}>;
 
 export async function generateMetadata({ searchParams }: ShopProps): Promise<Metadata> {
   const params = await searchParams;
@@ -132,21 +138,28 @@ export default async function ShopPage({ searchParams }: ShopProps) {
   else if (sort === 'price-desc') orderBy = { price: 'desc' };
   else if (sort === 'popular') orderBy = { reviewCount: 'desc' };
 
-  // Run database queries
-  const [totalProducts, products, categories] = await Promise.all([
-    prisma.product.count({ where }),
-    prisma.product.findMany({
-      where,
-      include: { category: true },
-      orderBy,
-      skip: (currentPage - 1) * pageSize,
-      take: pageSize,
-    }),
-    prisma.category.findMany({
-      select: { id: true, name: true, slug: true },
-      orderBy: { displayOrder: 'asc' },
-    }),
-  ]);
+  // Run database queries, keeping the public catalog shell available if DB setup is pending.
+  let totalProducts = 0;
+  let products: ShopProduct[] = [];
+  let categories: ShopCategory[] = [];
+  try {
+    [totalProducts, products, categories] = await Promise.all([
+      prisma.product.count({ where }),
+      prisma.product.findMany({
+        where,
+        include: { category: true },
+        orderBy,
+        skip: (currentPage - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.category.findMany({
+        select: { id: true, name: true, slug: true },
+        orderBy: { displayOrder: 'asc' },
+      }),
+    ]);
+  } catch (error) {
+    console.error('Shop database unavailable; rendering empty catalog:', error);
+  }
 
   const totalPages = Math.ceil(totalProducts / pageSize);
 

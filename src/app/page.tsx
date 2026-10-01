@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import type { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import ProductCard from '@/components/ProductCard';
 import { Sparkles, Feather, Crown, Scissors } from 'lucide-react';
@@ -12,28 +13,38 @@ export const metadata = {
     'Exquisite Pakistani handcrafted frocks, anarkalis, and couture for little girls aged 3–5. Pure silks, organza, authentic zari embroidery, and bespoke tailoring.',
 };
 
+type FeaturedProduct = Prisma.ProductGetPayload<{ include: { category: true } }>;
+type HomepageReview = Prisma.ReviewGetPayload<{ include: { product: true } }>;
+
 export default async function HomePage() {
   // Fetch real database records
-  const [featuredProducts, newArrivals, reviews] = await Promise.all([
-    prisma.product.findMany({
-      where: { isFeatured: true },
-      include: { category: true },
-      take: 8,
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.product.findMany({
-      where: { isNewArrival: true },
-      include: { category: true },
-      take: 8,
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.review.findMany({
-      where: { isApproved: true },
-      include: { product: true },
-      take: 6,
-      orderBy: { createdAt: 'desc' },
-    }),
-  ]);
+  let featuredProducts: FeaturedProduct[] = [];
+  let newArrivals: FeaturedProduct[] = [];
+  let reviews: HomepageReview[] = [];
+  try {
+    [featuredProducts, newArrivals, reviews] = await Promise.all([
+      prisma.product.findMany({
+        where: { isFeatured: true },
+        include: { category: true },
+        take: 8,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.product.findMany({
+        where: { isNewArrival: true },
+        include: { category: true },
+        take: 8,
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.review.findMany({
+        where: { isApproved: true },
+        include: { product: true },
+        take: 6,
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+  } catch (error) {
+    console.error('Homepage database unavailable; rendering storefront shell:', error);
+  }
 
   const colorPalettes = [
     { name: 'Dusty Rose', color: '#D98A92', query: 'Rose' },

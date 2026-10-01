@@ -13,10 +13,16 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const product = await prisma.product.findUnique({
-    where: { slug },
-    include: { category: true },
-  });
+  let product;
+  try {
+    product = await prisma.product.findUnique({
+      where: { slug },
+      include: { category: true },
+    });
+  } catch (error) {
+    console.error('Product metadata database unavailable:', error);
+    return { title: 'DHAAGAÉ Couture | The Boutique' };
+  }
 
   if (!product) return { title: 'Product Not Found | DHAAGAÉ' };
 

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
+import type { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -11,15 +12,24 @@ export const metadata: Metadata = {
     'Explore DHAAGAÉ curated collections — Eid Couture, Wedding Royale, Birthday Princess, and Everyday Luxury Frocks.',
 };
 
+type CollectionCategory = Prisma.CategoryGetPayload<{
+  include: { _count: { select: { products: true } } };
+}>;
+
 export default async function CollectionsPage() {
-  const categories = await prisma.category.findMany({
-    orderBy: { displayOrder: 'asc' },
-    include: {
-      _count: {
-        select: { products: true },
+  let categories: CollectionCategory[] = [];
+  try {
+    categories = await prisma.category.findMany({
+      orderBy: { displayOrder: 'asc' },
+      include: {
+        _count: {
+          select: { products: true },
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    console.error('Collections database unavailable; rendering empty collections:', error);
+  }
 
   return (
     <main style={{ backgroundColor: 'var(--ivory-base)', padding: '48px 0 80px' }}>
