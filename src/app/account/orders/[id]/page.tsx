@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { getCurrentUser } from '@/lib/auth';
 import { redirect, notFound } from 'next/navigation';
 import prisma from '@/lib/db';
@@ -38,9 +39,9 @@ export default async function OrderDetailPage({ params }: Props) {
   return (
     <main className="container section">
       <div className="mb-8">
-        <a href="/account/orders" style={{ fontSize: '13px', color: 'var(--earth-taupe)', textDecoration: 'none', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+        <Link href="/account/orders" style={{ fontSize: '13px', color: 'var(--earth-taupe)', textDecoration: 'none', marginBottom: '8px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
           ← Back to Orders
-        </a>
+        </Link>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginTop: '8px' }}>
           <h1 className="display-md text-plum">Order #{order.orderNumber}</h1>
           <span className={`badge ${

@@ -119,7 +119,7 @@ Return a JSON object:
   }
 
   // Graceful rule-based scoring fallback
-  let scored = catalog.map((p) => {
+  const scored = catalog.map((p) => {
     let score = 0;
     const txt = `${p.name} ${p.colors} ${p.occasion} ${p.fabric} ${p.style}`.toLowerCase();
     if (input.occasion && txt.includes(input.occasion.toLowerCase())) score += 5;

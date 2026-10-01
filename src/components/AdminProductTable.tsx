@@ -43,7 +43,7 @@ export default function AdminProductTable() {
   const [sort, setSort] = useState('newest');
 
   // Inline editing / actions feedback
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [, setUpdatingId] = useState<string | null>(null);
   const [stockInput, setStockInput] = useState<{ [id: string]: number }>({});
   const [toast, setToast] = useState<string | null>(null);
 

@@ -5,6 +5,8 @@ import ProductDetailClient from '@/components/ProductDetailClient';
 import ProductCard from '@/components/ProductCard';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
@@ -202,4 +204,3 @@ export default async function ProductDetailPage({ params }: Props) {
     </main>
   );
 }
-

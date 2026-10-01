@@ -1,8 +1,34 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { jwtVerify } from 'jose';
 
 const COOKIE_NAME = 'dhaagae_token';
+
+async function verifyMiddlewareToken(token: string) {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) return null;
+
+  try {
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+    if (
+      typeof payload.userId !== 'string' ||
+      typeof payload.email !== 'string' ||
+      typeof payload.name !== 'string' ||
+      (payload.role !== 'CUSTOMER' && payload.role !== 'ADMIN')
+    ) {
+      return null;
+    }
+
+    return {
+      userId: payload.userId,
+      email: payload.email,
+      name: payload.name,
+      role: payload.role,
+    } as const;
+  } catch {
+    return null;
+  }
+}
 
 // ─── Protected route definitions ─────────────────────────────────────────────
 
@@ -25,10 +51,10 @@ const GUEST_ONLY_ROUTES = ['/login', '/register', '/forgot-password', '/reset-pa
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get(COOKIE_NAME)?.value ?? null;
-  const session = token ? verifyToken(token) : null;
+  const session = token ? await verifyMiddlewareToken(token) : null;
 
   // 1. Admin routes — require ADMIN role
   if (ADMIN_REQUIRED_ROUTES.some((route) => pathname.startsWith(route))) {

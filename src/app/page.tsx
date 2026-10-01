@@ -4,6 +4,8 @@ import prisma from '@/lib/db';
 import ProductCard from '@/components/ProductCard';
 import { Sparkles, Feather, Crown, Scissors } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: "DHAAGAÉ — Luxury Handmade Children's Couture (Ages 3–5)",
   description:
@@ -12,7 +14,7 @@ export const metadata = {
 
 export default async function HomePage() {
   // Fetch real database records
-  const [featuredProducts, newArrivals, categories, reviews] = await Promise.all([
+  const [featuredProducts, newArrivals, reviews] = await Promise.all([
     prisma.product.findMany({
       where: { isFeatured: true },
       include: { category: true },
@@ -24,9 +26,6 @@ export default async function HomePage() {
       include: { category: true },
       take: 8,
       orderBy: { createdAt: 'desc' },
-    }),
-    prisma.category.findMany({
-      orderBy: { displayOrder: 'asc' },
     }),
     prisma.review.findMany({
       where: { isApproved: true },
@@ -765,4 +764,3 @@ export default async function HomePage() {
     </div>
   );
 }
-

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { requireAdmin } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/db';
@@ -59,8 +60,8 @@ export default async function AdminDashboardPage() {
           <h1 className="display-md text-plum">Admin Dashboard</h1>
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <a href="/admin/products/new" className="btn btn-primary btn-sm">+ New Product</a>
-          <a href="/shop" className="btn btn-ghost btn-sm" target="_blank">View Store ↗</a>
+          <Link href="/admin/products/new" className="btn btn-primary btn-sm">+ New Product</Link>
+          <Link href="/shop" className="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer">View Store ↗</Link>
         </div>
       </div>
 
@@ -90,7 +91,7 @@ export default async function AdminDashboardPage() {
           <div className="card card-xl">
             <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--charcoal-warm)' }}>Recent Orders</h2>
-              <a href="/admin/orders" style={{ fontSize: '12px', color: 'var(--plum-royal)', textDecoration: 'none', letterSpacing: '0.05em' }}>View All →</a>
+              <Link href="/admin/orders" style={{ fontSize: '12px', color: 'var(--plum-royal)', textDecoration: 'none', letterSpacing: '0.05em' }}>View All →</Link>
             </div>
             {recentOrders.map((order) => (
               <div key={order.id} style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -152,9 +153,9 @@ export default async function AdminDashboardPage() {
               { href: '/admin/analytics', label: 'Analytics' },
               { href: '/admin/ai', label: 'AI Settings' },
             ].map((link) => (
-              <a key={link.href} href={link.href} className="dropdown-item" style={{ borderRadius: '8px' }}>
+              <Link key={link.href} href={link.href} className="dropdown-item" style={{ borderRadius: '8px' }}>
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
         </div>

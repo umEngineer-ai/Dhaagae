@@ -4,6 +4,8 @@ import ProductCard from '@/components/ProductCard';
 import ShopFilters from '@/components/ShopFilters';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 interface ShopProps {
   searchParams: Promise<{
     search?: string;

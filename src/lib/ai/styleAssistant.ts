@@ -66,10 +66,9 @@ export async function askStyleAssistant(
   });
 
   // Check if user is asking about a specific product
-  let contextProduct = null;
-  if (productContextId) {
-    contextProduct = catalogSummary.find((p) => p.id === productContextId);
-  }
+  const contextProduct = productContextId
+    ? catalogSummary.find((p) => p.id === productContextId)
+    : null;
 
   const systemPrompt = `You are the DHAAGAÉ Style Assistant, a warm, sophisticated fashion consultant for a luxury Pakistani handmade children's boutique (target age 3–5 years).
 You help parents find the perfect frocks for Eid, weddings, birthdays, parties, and everyday royal elegance.

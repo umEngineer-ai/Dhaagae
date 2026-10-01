@@ -3,6 +3,28 @@ import prisma from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 import { sendOrderConfirmationEmail } from '@/lib/email';
 
+type VerifiedOrderItem = {
+  productId: string;
+  productName: string;
+  productImage: string;
+  price: number;
+  quantity: number;
+  size: string;
+  color: string;
+  total: number;
+  customization: {
+    color: string | null;
+    fabric: string | null;
+    sleeve: string | null;
+    neck: string | null;
+    length: string | null;
+    embroidery: string | null;
+    decorativeElements: string | null;
+    notes: string | null;
+    customPrice: number;
+  } | null;
+};
+
 export async function POST(req: Request) {
   try {
     const user = await getCurrentUser();
@@ -29,7 +51,7 @@ export async function POST(req: Request) {
 
     // SERVER-SIDE SECURITY & PRICING VERIFICATION
     let serverSubtotal = 0;
-    const verifiedOrderItems: any[] = [];
+    const verifiedOrderItems: VerifiedOrderItem[] = [];
 
     for (const item of items) {
       const product = await prisma.product.findUnique({

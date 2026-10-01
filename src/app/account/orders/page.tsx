@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { getCurrentUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/db';
@@ -23,9 +24,9 @@ export default async function OrdersPage() {
   return (
     <main className="container section">
       <div className="mb-8">
-        <a href="/account" style={{ fontSize: '13px', color: 'var(--earth-taupe)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
+        <Link href="/account" style={{ fontSize: '13px', color: 'var(--earth-taupe)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
           ← Back to Account
-        </a>
+        </Link>
         <h1 className="display-md text-plum">My Orders</h1>
       </div>
 
@@ -41,13 +42,13 @@ export default async function OrdersPage() {
             <p className="empty-state-description">
               Your order history will appear here once you place your first order.
             </p>
-            <a href="/shop" className="btn btn-primary mt-4">Shop Collection</a>
+            <Link href="/shop" className="btn btn-primary mt-4">Shop Collection</Link>
           </div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {orders.map((order) => (
-            <a
+            <Link
               key={order.id}
               href={`/account/orders/${order.id}`}
               className="card card-hover"
@@ -76,7 +77,7 @@ export default async function OrdersPage() {
                   </p>
                 </div>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       )}

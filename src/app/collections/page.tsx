@@ -3,6 +3,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import prisma from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Couture Collections | DHAAGAÉ',
   description:
@@ -125,4 +127,3 @@ export default async function CollectionsPage() {
     </main>
   );
 }
-
