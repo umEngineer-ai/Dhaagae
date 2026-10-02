@@ -5,6 +5,9 @@ import { requireAdmin } from '@/lib/auth';
 export async function POST(req: Request) {
   try {
     await requireAdmin();
+    if (!process.env.AI_API_KEY || process.env.AI_API_KEY.startsWith('your-')) {
+      return NextResponse.json({ error: 'AI copy generation is not configured. Add AI_API_KEY in the server environment.' }, { status: 503 });
+    }
 
     const body = await req.json();
 

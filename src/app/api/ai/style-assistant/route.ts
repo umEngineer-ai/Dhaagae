@@ -13,10 +13,15 @@ export async function POST(req: Request) {
 
     const user = await getCurrentUser();
     const result = await askStyleAssistant(query, history, productContextId);
+    let persistedConversationId: string | undefined;
 
     // Save AI conversation and message history to database if logged in
     try {
       let convId = conversationId;
+      if (convId && user) {
+        const owned = await prisma.aIConversation.findFirst({ where: { id: convId, userId: user.id }, select: { id: true } });
+        if (!owned) convId = undefined;
+      }
       if (!convId && user) {
         const conv = await prisma.aIConversation.create({
           data: {
@@ -27,6 +32,7 @@ export async function POST(req: Request) {
         });
         convId = conv.id;
       }
+      persistedConversationId = convId;
 
       if (convId) {
         await prisma.aIMessage.createMany({
@@ -48,7 +54,7 @@ export async function POST(req: Request) {
       console.warn('Could not persist AI message history:', saveErr);
     }
 
-    return NextResponse.json(result);
+    return NextResponse.json({ ...result, conversationId: persistedConversationId });
   } catch (error) {
     console.error('Style assistant error:', error);
     return NextResponse.json({ error: 'Failed to process AI Style Assistant query' }, { status: 500 });

@@ -46,6 +46,7 @@ export default function AdminProductForm({ initialData, isEditing = false }: Adm
   const [uploadingImage, setUploadingImage] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [generatingCopy, setGeneratingCopy] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState<ProductFormData>({
@@ -181,6 +182,28 @@ export default function AdminProductForm({ initialData, isEditing = false }: Adm
   };
 
   // Submit Handler
+  const generateProductCopy = async () => {
+    if (!formData.name || !formData.fabric || !formData.colors) {
+      setErrorMessage('Enter product name, fabric, and colors before generating copy.');
+      return;
+    }
+    setGeneratingCopy(true);
+    setErrorMessage(null);
+    try {
+      const response = await fetch('/api/ai/generate-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: formData.name, fabric: formData.fabric, color: formData.colors, occasion: formData.occasion, designDetails: formData.style, sizeInfo: formData.ageRange }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Could not generate product copy');
+      setFormData((current) => ({ ...current, description: data.description || current.description, shortDescription: data.shortDescription || current.shortDescription, tags: Array.isArray(data.tags) ? data.tags.join(', ') : current.tags }));
+      setSuccessMessage('AI copy loaded for review. Review it before saving the product.');
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Could not generate product copy');
+    } finally { setGeneratingCopy(false); }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -333,6 +356,10 @@ export default function AdminProductForm({ initialData, isEditing = false }: Adm
         </div>
 
         <div style={{ marginTop: '20px' }}>
+          <button type="button" onClick={generateProductCopy} disabled={generatingCopy} className="btn btn-secondary btn-sm" style={{ marginBottom: '10px' }}>
+            {generatingCopy ? 'Generating…' : 'Generate with AI'}
+          </button>
+          <p style={{ fontSize: '11px', color: 'var(--earth-taupe)', marginBottom: '8px' }}>AI suggestions are drafts only. Review and edit before saving.</p>
           <label className="label" style={{ marginBottom: '6px', display: 'block' }}>Full Description & Craftsmanship Story *</label>
           <textarea
             rows={4}

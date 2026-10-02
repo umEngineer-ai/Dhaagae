@@ -35,6 +35,7 @@ export default function ShopFilters({ categories, totalProducts }: ShopFiltersPr
 
   // Local search input
   const [searchInput, setSearchInput] = useState(currentSearch);
+  const [naturalLoading, setNaturalLoading] = useState(false);
 
   // Update URL helper
   const updateQuery = (key: string, value: string | null) => {
@@ -50,6 +51,23 @@ export default function ShopFilters({ categories, totalProducts }: ShopFiltersPr
 
   const clearAllFilters = () => {
     router.push('/shop');
+  };
+
+  const runNaturalSearch = async () => {
+    if (!searchInput.trim()) return;
+    setNaturalLoading(true);
+    try {
+      const response = await fetch('/api/ai/natural-search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: searchInput }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Search unavailable');
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('search', searchInput.trim());
+      const filters = data.parsedFilters || {};
+      for (const [key, value] of Object.entries(filters)) if (value !== null && value !== undefined && value !== '' && key !== 'keyword') params.set(key === 'maxPrice' ? 'maxPrice' : key === 'minPrice' ? 'minPrice' : key, String(value));
+      params.delete('page');
+      router.push(`/shop?${params.toString()}`);
+    } catch { updateQuery('search', searchInput); }
+    finally { setNaturalLoading(false); }
   };
 
   const hasActiveFilters = Boolean(
@@ -75,12 +93,9 @@ export default function ShopFilters({ categories, totalProducts }: ShopFiltersPr
     <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
       {/* Search Input */}
       <div>
-        <label className="label" style={{ marginBottom: '8px', display: 'block' }}>Search Collection</label>
+          <label className="label" style={{ marginBottom: '8px', display: 'block' }}>Search Collection with AI</label>
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            updateQuery('search', searchInput);
-          }}
+            onSubmit={(e) => { e.preventDefault(); void runNaturalSearch(); }}
           style={{ display: 'flex', gap: '6px' }}
         >
           <input
@@ -91,8 +106,9 @@ export default function ShopFilters({ categories, totalProducts }: ShopFiltersPr
             className="input"
             style={{ fontSize: '13px', padding: '8px 12px' }}
           />
-          <button type="submit" className="btn btn-primary btn-sm">Go</button>
+          <button type="submit" className="btn btn-primary btn-sm" disabled={naturalLoading}>{naturalLoading ? '…' : 'Find'}</button>
         </form>
+        <p style={{ fontSize: '11px', color: 'var(--earth-taupe)', marginTop: '6px' }}>Try: “lavender frock for a 4 year old under 7000”</p>
       </div>
 
       {/* Category Filter */}

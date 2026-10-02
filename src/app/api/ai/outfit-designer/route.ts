@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { generateCustomOutfitDesign } from '@/lib/ai/outfitDesigner';
 import { getCurrentUser } from '@/lib/auth';
 import prisma from '@/lib/db';
+import { generateDesignConceptImage } from '@/lib/ai/imageGeneration';
 
 export async function POST(req: Request) {
   try {
@@ -13,10 +14,16 @@ export async function POST(req: Request) {
     }
 
     const design = await generateCustomOutfitDesign(body);
+    const generatedImageUrl = await generateDesignConceptImage(
+      `${body.ageGroup || '4'} year old child, ${body.occasion}, ${body.mainColor} ${body.fabric} frock, ${body.sleeveStyle} sleeves, ${body.neckStyle} neckline, ${body.length} skirt, details: ${body.embroidery}. ${body.prompt || ''}`
+    );
 
     // Save AI design in database
     let savedDesignId: string | null = null;
     try {
+      if (!user) {
+        return NextResponse.json({ ...design, generatedImageUrl, designId: null, requiresLoginToSave: true });
+      }
       const saved = await prisma.aIDesign.create({
         data: {
           userId: user ? user.id : null,
@@ -36,6 +43,7 @@ export async function POST(req: Request) {
           suggestedColors: JSON.stringify(design.colorPalette),
           customizationLevel: design.customizationLevel,
           estimatedPrice: design.estimatedPrice,
+          generatedImageUrl,
         },
       });
       savedDesignId = saved.id;
@@ -45,6 +53,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       ...design,
+      generatedImageUrl,
       designId: savedDesignId,
     });
   } catch (error) {

@@ -141,10 +141,12 @@ Respond in JSON format with:
     return keywords.some((k) => text.includes(k));
   });
 
-  const selectedProds = matched.length > 0 ? matched.slice(0, 3) : catalogSummary.slice(0, 3);
+  const selectedProds = matched.slice(0, 3);
 
   return {
-    message: `Welcome to DHAAGAÉ! For your little one, we recommend our signature handcrafted pieces crafted from breathable pure cottons, raw silks, and delicate organza—featuring artisanal tilla and resham thread embroidery.`,
+    message: selectedProds.length > 0
+      ? `I found ${selectedProds.length} piece${selectedProds.length === 1 ? '' : 's'} in our current collection that match the details you shared. These recommendations are based on live DHAAGAÉ product records.`
+      : 'I could not find a current DHAAGAÉ product matching all of those details. Try relaxing the color, occasion, or budget and I will search the live collection again.',
     recommendedProducts: selectedProds.map((prod) => ({
       id: prod.id,
       name: prod.name,
