@@ -3,6 +3,9 @@ import prisma from '@/lib/db';
 import { getCurrentUser, requireAdmin } from '@/lib/auth';
 import { sendOrderStatusUpdateEmail } from '@/lib/email';
 
+const ORDER_STATUSES = ['PENDING', 'CONFIRMED', 'PROCESSING', 'CUSTOMIZATION_IN_PROGRESS', 'READY', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'];
+const PAYMENT_STATUSES = ['PENDING', 'PAID', 'FAILED', 'REFUNDED'];
+
 export async function GET(req: Request, { params }: { params: Promise<{ orderNumber: string }> }) {
   try {
     const { orderNumber } = await params;
@@ -44,6 +47,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderN
     const { orderNumber } = await params;
     const { status, paymentStatus, trackingNumber } = await req.json();
 
+    if (status && !ORDER_STATUSES.includes(status)) {
+      return NextResponse.json({ error: 'Invalid order status' }, { status: 400 });
+    }
+    if (paymentStatus && !PAYMENT_STATUSES.includes(paymentStatus)) {
+      return NextResponse.json({ error: 'Invalid payment status' }, { status: 400 });
+    }
+
     const existingOrder = await prisma.order.findUnique({
       where: { orderNumber },
       include: { user: true, orderItems: true },
@@ -51,6 +61,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderN
 
     if (!existingOrder) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    if (existingOrder.status === 'DELIVERED' && status && status !== 'DELIVERED') {
+      return NextResponse.json({ error: 'Delivered orders cannot move backwards' }, { status: 409 });
+    }
+    if (existingOrder.status === 'CANCELLED' && status && status !== 'CANCELLED') {
+      return NextResponse.json({ error: 'Cancelled orders cannot be reopened' }, { status: 409 });
+    }
+    if (paymentStatus === 'PAID' && existingOrder.paymentMethod !== 'COD') {
+      return NextResponse.json({ error: 'Online payment verification is required before marking paid' }, { status: 409 });
     }
 
     const updated = await prisma.order.update({

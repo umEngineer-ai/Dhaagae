@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 import { sendOrderConfirmationEmail } from '@/lib/email';
+import { preparePayment, type PaymentMethod } from '@/lib/payments';
 
 type VerifiedOrderItem = {
   productId: string;
@@ -48,6 +49,9 @@ export async function POST(req: Request) {
     if (!shippingAddress || !customerName || !customerEmail || !customerPhone) {
       return NextResponse.json({ error: 'Customer information and shipping address are required' }, { status: 400 });
     }
+
+    const payment = preparePayment(paymentMethod as PaymentMethod);
+    if (!payment.enabled) return NextResponse.json({ error: payment.error }, { status: 400 });
 
     // SERVER-SIDE SECURITY & PRICING VERIFICATION
     let serverSubtotal = 0;
@@ -111,22 +115,20 @@ export async function POST(req: Request) {
 
     // Server-side discount calculation
     let serverDiscount = 0;
+    let appliedCouponId: string | null = null;
+    let appliedCouponMaxUses = 0;
     if (couponCode) {
       const coupon = await prisma.coupon.findUnique({
         where: { code: couponCode.toUpperCase().trim() },
       });
       if (coupon && coupon.isActive) {
         if (!coupon.expiresAt || new Date() <= coupon.expiresAt) {
-          if (!coupon.maxUses || coupon.usedCount < coupon.maxUses) {
+          if (serverSubtotal >= coupon.minOrderAmount && (!coupon.maxUses || coupon.usedCount < coupon.maxUses)) {
             serverDiscount = coupon.discountAmount
               ? coupon.discountAmount
               : Math.round((serverSubtotal * (coupon.discountPercent || 0)) / 100);
-            
-            // Increment coupon usage
-            await prisma.coupon.update({
-              where: { id: coupon.id },
-              data: { usedCount: { increment: 1 } },
-            });
+            appliedCouponId = coupon.id;
+            appliedCouponMaxUses = coupon.maxUses;
           }
         }
       }
@@ -146,8 +148,9 @@ export async function POST(req: Request) {
       ? shippingAddress
       : `${shippingAddress.addressLine1}, ${shippingAddress.city}, ${shippingAddress.province || 'Pakistan'}`;
 
-    // Create Order with Items, Customizations, and Payment in transaction
-    const order = await prisma.order.create({
+    // Create the order and reserve stock atomically. Never trust client totals or stock.
+    const order = await prisma.$transaction(async (tx) => {
+      const createdOrder = await tx.order.create({
       data: {
         orderNumber,
         userId: user ? user.id : null,
@@ -160,7 +163,7 @@ export async function POST(req: Request) {
         total: finalTotal,
         currency: 'PKR',
         paymentMethod,
-        paymentStatus: paymentMethod === 'COD' ? 'PENDING' : 'PAID',
+        paymentStatus: 'PENDING',
         shippingAddressJson: JSON.stringify(shippingAddress),
         notes: notes || null,
         orderItems: {
@@ -187,7 +190,7 @@ export async function POST(req: Request) {
             amount: finalTotal,
             currency: 'PKR',
             method: paymentMethod,
-            status: paymentMethod === 'COD' ? 'PENDING' : 'COMPLETED',
+            status: 'PENDING',
             transactionRef: `TXN-${orderNumber}`,
           },
         },
@@ -200,19 +203,24 @@ export async function POST(req: Request) {
         },
         payments: true,
       },
-    });
-
-    // Deduct inventory
-    for (const item of verifiedOrderItems) {
-      await prisma.product.update({
-        where: { id: item.productId },
-        data: {
-          stockQuantity: {
-            decrement: item.quantity,
-          },
-        },
       });
-    }
+
+      for (const item of verifiedOrderItems) {
+        const reserved = await tx.product.updateMany({
+          where: { id: item.productId, stockQuantity: { gte: item.quantity } },
+          data: { stockQuantity: { decrement: item.quantity } },
+        });
+        if (reserved.count !== 1) throw new Error(`Insufficient stock for ${item.productName}`);
+      }
+      if (appliedCouponId) {
+        const couponUse = await tx.coupon.updateMany({
+          where: { id: appliedCouponId, isActive: true, ...(appliedCouponMaxUses > 0 ? { usedCount: { lt: appliedCouponMaxUses } } : {}) },
+          data: { usedCount: { increment: 1 } },
+        });
+        if (couponUse.count !== 1) throw new Error('Coupon is no longer available');
+      }
+      return createdOrder;
+    });
 
     // Create notification if user is logged in
     if (user) {

@@ -50,7 +50,7 @@ export default async function OrdersPage() {
           {orders.map((order) => (
             <Link
               key={order.id}
-              href={`/account/orders/${order.id}`}
+              href={`/account/orders/${order.orderNumber}`}
               className="card card-hover"
               style={{ padding: '20px 24px', textDecoration: 'none' }}
             >

@@ -20,7 +20,7 @@ export default async function OrderDetailPage({ params }: Props) {
 
   const order = await prisma.order.findFirst({
     where: {
-      id,
+      orderNumber: id,
       userId: user.id, // Security: only own orders
     },
     include: {
