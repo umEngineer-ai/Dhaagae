@@ -3,26 +3,24 @@ import Image from 'next/image';
 import type { Prisma } from '@prisma/client';
 import prisma from '@/lib/db';
 import ProductCard from '@/components/ProductCard';
-import { Sparkles, Feather, Crown, Scissors } from 'lucide-react';
+import { ArrowRight, Sparkles, Wand2, Shirt, Palette, ShieldCheck, Search } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: "DHAAGAÉ — Luxury Handmade Children's Couture (Ages 3–5)",
+  title: 'Dhaagae — AI Fashion, Made for You',
   description:
-    'Exquisite Pakistani handcrafted frocks, anarkalis, and couture for little girls aged 3–5. Pure silks, organza, authentic zari embroidery, and bespoke tailoring.',
+    'Discover Pakistani fashion, explore curated looks, and create personalized outfits with AI-powered styling and design tools.',
 };
 
 type FeaturedProduct = Prisma.ProductGetPayload<{ include: { category: true } }>;
-type HomepageReview = Prisma.ReviewGetPayload<{ include: { product: true } }>;
 
 export default async function HomePage() {
-  // Fetch real database records
   let featuredProducts: FeaturedProduct[] = [];
   let newArrivals: FeaturedProduct[] = [];
-  let reviews: HomepageReview[] = [];
+
   try {
-    [featuredProducts, newArrivals, reviews] = await Promise.all([
+    [featuredProducts, newArrivals] = await Promise.all([
       prisma.product.findMany({
         where: { isFeatured: true },
         include: { category: true },
@@ -35,743 +33,512 @@ export default async function HomePage() {
         take: 8,
         orderBy: { createdAt: 'desc' },
       }),
-      prisma.review.findMany({
-        where: { isApproved: true },
-        include: { product: true },
-        take: 6,
-        orderBy: { createdAt: 'desc' },
-      }),
     ]);
   } catch (error) {
-    console.error('Homepage database unavailable; rendering storefront shell:', error);
+    console.error('Homepage database unavailable:', error);
   }
 
-  const colorPalettes = [
-    { name: 'Dusty Rose', color: '#D98A92', query: 'Rose' },
-    { name: 'Royal Maroon', color: '#4A1525', query: 'Maroon' },
-    { name: 'Mint Green', color: '#98D8AA', query: 'Mint' },
-    { name: 'Ivory White', color: '#F7F4EE', textDark: true, query: 'White' },
-    { name: 'Sapphire Blue', color: '#1B3B6F', query: 'Blue' },
-    { name: 'Mustard Gold', color: '#D4AF37', query: 'Gold' },
+  const fallbackProducts = [...featuredProducts, ...newArrivals].filter(
+    (product, index, arr) => arr.findIndex((item) => item.id === product.id) === index,
+  );
+
+  const heroImages = [
+    '/products/rose-garden-tiered-frock.jpg',
+    '/products/lavender-bloom-kurta-set.jpg',
+    '/products/teal-heritage-kurta-set.jpg',
   ];
 
-  const occasions = [
+  const styleCategories = [
     {
-      title: 'Eid Festivities',
-      subtitle: 'Resham threadwork & gold zari',
+      title: 'Kurtas & Sets',
+      subtitle: 'Elegant everyday silhouettes',
+      image: '/products/lavender-bloom-kurta-set.jpg',
+      href: '/shop?style=Kurta',
+    },
+    {
+      title: 'Festive Frocks',
+      subtitle: 'Statement looks for special days',
+      image: '/products/rose-garden-tiered-frock.jpg',
       href: '/shop?occasion=Eid',
-      img: '/products/teal-heritage-kurta-set.jpg',
     },
     {
-      title: 'Weddings & Barat',
-      subtitle: 'Regal Jamawar & heavy kalis',
-      href: '/shop?occasion=Wedding',
-      img: '/products/lavender-bloom-kurta-set.jpg',
+      title: 'Heritage Edit',
+      subtitle: 'Traditional details, modern finish',
+      image: '/products/teal-heritage-kurta-set.jpg',
+      href: '/shop?style=Traditional',
     },
     {
-      title: 'Birthday Princess',
-      subtitle: 'Dreamy ruffled organza & pastels',
-      href: '/shop?category=birthday-collection',
-      img: '/products/vintage-polka-dot-frock.jpg',
+      title: 'Playful Prints',
+      subtitle: 'Fresh colours and joyful patterns',
+      image: '/products/vintage-polka-dot-frock.jpg',
+      href: '/shop?style=Frock',
+    },
+  ];
+
+  const features = [
+    {
+      icon: Wand2,
+      title: 'AI Design Studio',
+      text: 'Describe your dream outfit and turn the idea into a personalized design.',
+      href: '/design',
     },
     {
-      title: 'Everyday Luxury',
-      subtitle: 'Pure breathable organic lawn',
-      href: '/shop?category=everyday-frocks',
-      img: '/products/floral-bloom-lawn-frock.jpg',
+      icon: Shirt,
+      title: 'Curated Fashion',
+      text: 'Explore ready-to-wear styles across traditional, festive and playful edits.',
+      href: '/shop',
+    },
+    {
+      icon: Sparkles,
+      title: 'AI Style Assistant',
+      text: 'Get outfit ideas, colour combinations and styling guidance in seconds.',
+      href: '/ai-assistant',
     },
   ];
 
   return (
-    <div style={{ backgroundColor: '#FAF7F0' }}>
-      {/* 1. HERO SECTION */}
+    <main style={{ background: 'var(--ivory)', overflow: 'hidden' }}>
+      {/* HERO */}
       <section
         style={{
-          position: 'relative',
-          padding: '80px 0 100px',
-          background: 'linear-gradient(135deg, #FAF7F0 0%, #F3EEE5 60%, rgba(179,202,187,0.18) 100%)',
+          background:
+            'radial-gradient(circle at 82% 20%, rgba(232,183,177,.34), transparent 28%), radial-gradient(circle at 12% 70%, rgba(143,175,154,.22), transparent 32%), linear-gradient(135deg,#fbf8f2 0%,#f5eee5 100%)',
           borderBottom: '1px solid var(--border-subtle)',
-          overflow: 'hidden',
+          padding: '54px 0 72px',
         }}
       >
-        <div className="container" style={{ position: 'relative', zIndex: 2 }}>
+        <div className="container">
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-              gap: '48px',
+              gridTemplateColumns: 'minmax(0,1.02fr) minmax(420px,.98fr)',
+              gap: '56px',
               alignItems: 'center',
             }}
           >
-            {/* Left Content */}
             <div>
               <div
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  backgroundColor: 'rgba(212, 175, 55, 0.15)',
-                  border: '1px solid var(--gold-zari)',
-                  padding: '6px 14px',
-                  borderRadius: 'var(--radius-pill)',
-                  marginBottom: '20px',
+                  gap: 8,
+                  padding: '8px 14px',
+                  borderRadius: 999,
+                  background: 'rgba(255,255,255,.75)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--sage-dark)',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: '.13em',
+                  textTransform: 'uppercase',
+                  marginBottom: 22,
                 }}
               >
-                <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--plum-royal)', textTransform: 'uppercase' }}>
-                  Handcrafted Couture • Ages 3–5
-                </span>
+                <Sparkles size={14} /> AI-powered fashion studio
               </div>
 
-              <h1
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(36px, 5vw, 60px)',
-                  fontWeight: 600,
-                  lineHeight: 1.15,
-                  color: 'var(--plum-royal)',
-                  marginBottom: '20px',
-                }}
-              >
-                Heirloom Elegance for Your Little Princess
+              <h1 className="display-xl" style={{ maxWidth: 720, marginBottom: 20 }}>
+                Your style. Your culture. <em style={{ color: 'var(--blush-deep)' }}>Your Dhaagae.</em>
               </h1>
 
               <p
                 style={{
-                  fontSize: '16px',
-                  lineHeight: 1.7,
-                  color: 'var(--charcoal-warm)',
-                  marginBottom: '32px',
-                  maxWidth: '520px',
+                  maxWidth: 610,
+                  fontSize: 17,
+                  lineHeight: 1.75,
+                  color: 'var(--text-muted)',
+                  marginBottom: 30,
                 }}
               >
-                Each DHAAGAÉ frock is an artisanal masterpiece. Hand-stitched in Pakistan with pure Banarsi
-                jamawar, featherlight organza, authentic gold zari, and softest cotton linings for delicate skin.
+                Discover beautiful Pakistani fashion, create new looks with AI, and turn your ideas into outfits
+                designed around your taste.
               </p>
 
-              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '40px' }}>
-                <Link href="/shop" className="btn btn-primary btn-lg">
-                  Explore The Boutique &rarr;
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 30 }}>
+                <Link href="/design" className="btn btn-primary btn-xl">
+                  Create with AI <Sparkles size={17} />
                 </Link>
-                <Link href="/design" className="btn btn-secondary btn-lg" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                  <Scissors size={16} /> Bespoke Atelier
+                <Link href="/shop" className="btn btn-secondary btn-xl">
+                  Explore Collection <ArrowRight size={17} />
                 </Link>
               </div>
 
-              {/* Trust Badges */}
               <div
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: '16px',
-                  borderTop: '1px solid var(--border-subtle)',
-                  paddingTop: '24px',
-                }}
-              >
-                <div>
-                  <h4 style={{ fontFamily: 'var(--font-brand)', fontSize: '18px', color: 'var(--plum-royal)' }}>18+ Hrs</h4>
-                  <p style={{ fontSize: '11px', color: 'var(--earth-taupe)', textTransform: 'uppercase' }}>Artisanal Needlework</p>
-                </div>
-                <div>
-                  <h4 style={{ fontFamily: 'var(--font-brand)', fontSize: '18px', color: 'var(--plum-royal)' }}>100%</h4>
-                  <p style={{ fontSize: '11px', color: 'var(--earth-taupe)', textTransform: 'uppercase' }}>Pure Cotton Lining</p>
-                </div>
-                <div>
-                  <h4 style={{ fontFamily: 'var(--font-brand)', fontSize: '18px', color: 'var(--plum-royal)' }}>Free COD</h4>
-                  <p style={{ fontSize: '11px', color: 'var(--earth-taupe)', textTransform: 'uppercase' }}>Across Pakistan</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Hero Image Card */}
-            <div style={{ position: 'relative' }}>
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  aspectRatio: '4 / 5',
-                  borderRadius: 'var(--radius-lg)',
-                  overflow: 'hidden',
-                  boxShadow: 'var(--shadow-xl)',
-                  border: '8px solid #fff',
-                }}
-              >
-                <Image
-                  src="/products/rose-garden-tiered-frock.jpg"
-                  alt="Rose Garden Tiered Frock - DHAAGAÉ Luxury Children's Couture"
-                  fill
-                  priority
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  style={{ objectFit: 'cover' }}
-                />
-
-                {/* Floating Tag */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '20px',
-                    left: '20px',
-                    right: '20px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    backdropFilter: 'blur(8px)',
-                    padding: '16px 20px',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid rgba(212, 175, 55, 0.3)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <div>
-                    <span style={{ fontSize: '10px', color: 'var(--gold-zari)', fontWeight: 700, textTransform: 'uppercase' }}>
-                      Artisanal Spring Drop
-                    </span>
-                    <h3 style={{ fontSize: '15px', color: 'var(--plum-royal)', fontWeight: 600 }}>
-                      Rose Garden Tiered Frock
-                    </h3>
-                  </div>
-                  <Link href="/shop/rose-garden-tiered-frock" className="btn btn-primary btn-xs">
-                    View &rarr;
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. FEATURED FROCKS (REAL DB DATA) */}
-      <section className="section">
-        <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 48px' }}>
-            <span style={{ fontSize: '12px', letterSpacing: '0.2em', color: 'var(--gold-zari)', textTransform: 'uppercase', fontWeight: 600 }}>
-              Curated By Master Artisans
-            </span>
-            <h2 className="display-lg text-plum mt-2">Signature Couture Frocks</h2>
-            <div className="divider-ornament" />
-            <p className="text-muted text-sm mt-3">
-              Hand-embellished with heritage resham embroidery, authentic gota ribbons, and delicate tilla vines.
-            </p>
-          </div>
-
-          <div className="product-grid">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-
-          <div style={{ textAlign: 'center', marginTop: '40px' }}>
-            <Link href="/shop?featured=true" className="btn btn-secondary">
-              View All Signature Frocks &rarr;
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. SHOP BY OCCASION */}
-      <section style={{ backgroundColor: 'var(--cream-soft)', padding: '80px 0' }}>
-        <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto 40px' }}>
-            <span style={{ fontSize: '12px', letterSpacing: '0.2em', color: 'var(--plum-royal)', textTransform: 'uppercase', fontWeight: 600 }}>
-              Tailored For Cherished Milestones
-            </span>
-            <h2 className="display-lg text-plum mt-2">Shop By Occasion</h2>
-            <div className="divider-ornament" />
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-              gap: '24px',
-            }}
-          >
-            {occasions.map((occ) => (
-              <Link
-                key={occ.title}
-                href={occ.href}
-                style={{
-                  position: 'relative',
-                  aspectRatio: '3 / 4',
-                  borderRadius: 'var(--radius-md)',
-                  overflow: 'hidden',
-                  textDecoration: 'none',
-                  boxShadow: 'var(--shadow-md)',
                   display: 'flex',
-                  alignItems: 'flex-end',
-                }}
-                className="group"
-              >
-                <Image
-                  src={occ.img}
-                  alt={occ.title}
-                  fill
-                  sizes="(max-width: 640px) 100vw, 25vw"
-                  style={{
-                    objectFit: 'cover',
-                    transition: 'transform 0.5s ease',
-                  }}
-                />
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'linear-gradient(to top, rgba(74, 21, 37, 0.85) 0%, rgba(74, 21, 37, 0.2) 60%, transparent 100%)',
-                  }}
-                />
-                <div style={{ position: 'relative', zIndex: 2, padding: '24px', width: '100%' }}>
-                  <h3
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: '22px',
-                      color: '#fff',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    {occ.title}
-                  </h3>
-                  <p style={{ fontSize: '12px', color: 'var(--gold-zari)', letterSpacing: '0.04em' }}>
-                    {occ.subtitle} &rarr;
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 4. BESPOKE ATELIER CTA */}
-      <section
-        style={{
-          backgroundColor: 'var(--plum-royal)',
-          color: '#fff',
-          padding: '80px 0',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        <div className="container" style={{ position: 'relative', zIndex: 2 }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '48px',
-              alignItems: 'center',
-            }}
-          >
-            <div>
-              <span className="badge badge-gold" style={{ marginBottom: '16px' }}>
-                Bespoke Couture Atelier
-              </span>
-              <h2
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(30px, 4vw, 44px)',
-                  lineHeight: 1.2,
-                  color: '#fff',
-                  marginBottom: '20px',
+                  flexWrap: 'wrap',
+                  gap: '10px 24px',
+                  color: 'var(--text-muted)',
+                  fontSize: 12,
                 }}
               >
-                Design Your Child&apos;s Dream Frock with DHAAGAÉ AI
-              </h2>
-              <p
-                style={{
-                  fontSize: '15px',
-                  lineHeight: 1.7,
-                  color: 'rgba(237, 228, 216, 0.85)',
-                  marginBottom: '32px',
-                }}
-              >
-                Select your preferred silhouette, heirloom fabrics (Banarsi silk, organza, velvet), neckline, sleeve
-                embellishments, and personalized child monograms. Our master tailors will bring it to life in Lahore.
-              </p>
-              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                <Link href="/design" className="btn btn-gold btn-lg">
-                  Open AI Design Studio &rarr;
-                </Link>
-                <Link href="/ai-assistant" className="btn btn-ghost btn-lg" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.3)' }}>
-                  Chat With AI Stylist
-                </Link>
-              </div>
-            </div>
-
-            {/* Atelier Steps */}
-            <div
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(212, 175, 55, 0.3)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '32px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '24px',
-              }}
-            >
-              {[
-                { step: '01', title: 'Choose Silhouette', desc: 'Kalidar, Anarkali, Peplum, or Princess Ballgown.' },
-                { step: '02', title: 'Pick Pure Fabrics', desc: 'Raw Silk, Tissue Organza, Jamawar, or Cotton Cambric.' },
-                { step: '03', title: 'Artisanal Embroidery', desc: 'Resham, Gold Zari, Mukaish, or Pearl Work.' },
-                { step: '04', title: 'Custom Measurements', desc: 'Tailored precisely for child ages 2 to 6.' },
-              ].map((item) => (
-                <div key={item.step} style={{ display: 'flex', gap: '16px' }}>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-brand)',
-                      color: 'var(--gold-zari)',
-                      fontSize: '18px',
-                      fontWeight: 700,
-                    }}
-                  >
-                    {item.step}
-                  </span>
-                  <div>
-                    <h3 style={{ fontSize: '15px', color: '#fff', fontWeight: 600 }}>{item.title}</h3>
-                    <p style={{ fontSize: '12px', color: 'rgba(237, 228, 216, 0.7)', marginTop: '2px' }}>{item.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. NEW ARRIVALS (REAL DB DATA) */}
-      <section className="section">
-        <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px', marginBottom: '40px' }}>
-            <div>
-              <span style={{ fontSize: '12px', letterSpacing: '0.2em', color: 'var(--gold-zari)', textTransform: 'uppercase', fontWeight: 600 }}>
-                Fresh From The Loom
-              </span>
-              <h2 className="display-lg text-plum mt-1">New Arrivals</h2>
-            </div>
-            <Link href="/shop?newArrival=true" className="btn btn-ghost">
-              Browse All New &rarr;
-            </Link>
-          </div>
-
-          <div className="product-grid">
-            {newArrivals.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 6. SHOP BY COLOR PALETTE */}
-      <section style={{ backgroundColor: '#fff', padding: '64px 0', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <span style={{ fontSize: '12px', letterSpacing: '0.2em', color: 'var(--plum-royal)', textTransform: 'uppercase', fontWeight: 600 }}>
-            Curated Hues
-          </span>
-          <h2 className="display-md text-plum mt-2 mb-8">Shop By Color Palette</h2>
-
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', flexWrap: 'wrap' }}>
-            {colorPalettes.map((item) => (
-              <Link
-                key={item.name}
-                href={`/shop?color=${encodeURIComponent(item.query)}`}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  textDecoration: 'none',
-                  gap: '8px',
-                  transition: 'transform 0.2s',
-                }}
-              >
-                <div
-                  style={{
-                    width: '64px',
-                    height: '64px',
-                    borderRadius: '50%',
-                    backgroundColor: item.color,
-                    border: '3px solid #fff',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                />
-                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--plum-royal)' }}>
-                  {item.name}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                  <ShieldCheck size={15} /> Personalized styling
                 </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 7. CRAFTSMANSHIP & HERITAGE */}
-      <section className="section">
-        <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 48px' }}>
-            <span style={{ fontSize: '12px', letterSpacing: '0.2em', color: 'var(--gold-zari)', textTransform: 'uppercase', fontWeight: 600 }}>
-              The DHAAGAÉ Promise
-            </span>
-            <h2 className="display-lg text-plum mt-2">Artisanal Craftsmanship</h2>
-            <div className="divider-ornament" />
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '32px',
-              alignItems: 'stretch',
-            }}
-          >
-            <div
-              className="card card-hover"
-              style={{
-                padding: '36px 28px',
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                height: '100%',
-                backgroundColor: '#ffffff',
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--border-subtle)',
-                boxShadow: 'var(--shadow-sm)',
-                transition: 'all 0.3s ease',
-              }}
-            >
-              <div
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(201, 169, 110, 0.12)',
-                  border: '1px solid rgba(201, 169, 110, 0.35)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '20px',
-                  color: 'var(--champagne-deep)',
-                  flexShrink: 0,
-                }}
-              >
-                <Sparkles size={28} strokeWidth={1.8} style={{ color: '#C9A96E' }} />
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                  <Palette size={15} /> Pakistani-inspired designs
+                </span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                  <Wand2 size={15} /> AI-assisted creation
+                </span>
               </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '22px',
-                  fontWeight: 600,
-                  color: 'var(--plum-royal)',
-                  marginBottom: '14px',
-                  minHeight: '28px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                Master Zardozi Artisans
-              </h3>
-              <p
-                style={{
-                  fontSize: '14px',
-                  lineHeight: 1.7,
-                  color: 'var(--charcoal-warm)',
-                  margin: 0,
-                  flex: 1,
-                }}
-              >
-                Every motif is meticulously hand-needled by traditional craftsmen in Lahore who have perfected
-                the royal art of Mughal threadwork across generations.
-              </p>
-            </div>
-
-            <div
-              className="card card-hover"
-              style={{
-                padding: '36px 28px',
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                height: '100%',
-                backgroundColor: '#ffffff',
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--border-subtle)',
-                boxShadow: 'var(--shadow-sm)',
-                transition: 'all 0.3s ease',
-              }}
-            >
-              <div
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(201, 169, 110, 0.12)',
-                  border: '1px solid rgba(201, 169, 110, 0.35)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '20px',
-                  color: 'var(--champagne-deep)',
-                  flexShrink: 0,
-                }}
-              >
-                <Feather size={28} strokeWidth={1.8} style={{ color: '#C9A96E' }} />
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '22px',
-                  fontWeight: 600,
-                  color: 'var(--plum-royal)',
-                  marginBottom: '14px',
-                  minHeight: '28px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                Heirloom Fabrics
-              </h3>
-              <p
-                style={{
-                  fontSize: '14px',
-                  lineHeight: 1.7,
-                  color: 'var(--charcoal-warm)',
-                  margin: 0,
-                  flex: 1,
-                }}
-              >
-                We source pure Banarsi jamawar, Katan raw silk, Korean tissue organza, and superfine organic
-                cotton lawn — zero synthetic itchy blends.
-              </p>
-            </div>
-
-            <div
-              className="card card-hover"
-              style={{
-                padding: '36px 28px',
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                height: '100%',
-                backgroundColor: '#ffffff',
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--border-subtle)',
-                boxShadow: 'var(--shadow-sm)',
-                transition: 'all 0.3s ease',
-              }}
-            >
-              <div
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(201, 169, 110, 0.12)',
-                  border: '1px solid rgba(201, 169, 110, 0.35)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '20px',
-                  color: 'var(--champagne-deep)',
-                  flexShrink: 0,
-                }}
-              >
-                <Crown size={28} strokeWidth={1.8} style={{ color: '#C9A96E' }} />
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: '22px',
-                  fontWeight: 600,
-                  color: 'var(--plum-royal)',
-                  marginBottom: '14px',
-                  minHeight: '28px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                Child-Centric Comfort
-              </h3>
-              <p
-                style={{
-                  fontSize: '14px',
-                  lineHeight: 1.7,
-                  color: 'var(--charcoal-warm)',
-                  margin: 0,
-                  flex: 1,
-                }}
-              >
-                Crafted specifically for ages 3–5: ultra-soft combed cotton inner lining, tag-less collar seams,
-                and lightweight flairs that let little princesses play freely.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. REAL CUSTOMER REVIEWS (REAL DB DATA) */}
-      {reviews.length > 0 && (
-        <section style={{ backgroundColor: 'var(--cream-soft)', padding: '80px 0' }}>
-          <div className="container">
-            <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 48px' }}>
-              <span style={{ fontSize: '12px', letterSpacing: '0.2em', color: 'var(--plum-royal)', textTransform: 'uppercase', fontWeight: 600 }}>
-                Loved By Mothers Across Pakistan
-              </span>
-              <h2 className="display-lg text-plum mt-2">Words From Our Clients</h2>
-              <div className="divider-ornament" />
             </div>
 
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '24px',
+                gridTemplateColumns: '1.15fr .85fr',
+                gap: 12,
+                alignItems: 'stretch',
               }}
             >
-              {reviews.map((rev) => (
+              <div
+                style={{
+                  position: 'relative',
+                  minHeight: 590,
+                  borderRadius: 28,
+                  overflow: 'hidden',
+                  boxShadow: 'var(--shadow-xl)',
+                  border: '7px solid rgba(255,255,255,.8)',
+                }}
+              >
+                <Image
+                  src={heroImages[0]}
+                  alt="Dhaagae featured fashion"
+                  fill
+                  priority
+                  sizes="(max-width: 900px) 60vw, 42vw"
+                  style={{ objectFit: 'cover' }}
+                />
                 <div
-                  key={rev.id}
                   style={{
-                    backgroundColor: '#fff',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '28px',
-                    border: '1px solid var(--border-subtle)',
-                    boxShadow: 'var(--shadow-sm)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, transparent 48%, rgba(35,44,39,.72) 100%)',
+                  }}
+                />
+                <div style={{ position: 'absolute', left: 22, right: 22, bottom: 22, color: '#fff' }}>
+                  <span style={{ fontSize: 10, letterSpacing: '.16em', textTransform: 'uppercase', fontWeight: 700 }}>
+                    Featured edit
+                  </span>
+                  <h2 className="display-sm" style={{ color: '#fff', marginTop: 4 }}>
+                    Heritage meets modern
+                  </h2>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: 12 }}>
+                {heroImages.slice(1).map((src, index) => (
+                  <div
+                    key={src}
+                    style={{
+                      position: 'relative',
+                      minHeight: 0,
+                      borderRadius: 22,
+                      overflow: 'hidden',
+                      boxShadow: 'var(--shadow-md)',
+                      border: '5px solid rgba(255,255,255,.78)',
+                    }}
+                  >
+                    <Image
+                      src={src}
+                      alt={index === 0 ? 'Lavender kurta set' : 'Teal heritage kurta set'}
+                      fill
+                      sizes="(max-width: 900px) 30vw, 20vw"
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI-FIRST ENTRY POINTS */}
+      <section style={{ padding: '28px 0 76px' }}>
+        <div className="container">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, minmax(0,1fr))',
+              gap: 16,
+            }}
+          >
+            {features.map(({ icon: Icon, title, text, href }) => (
+              <Link
+                key={title}
+                href={href}
+                className="card card-hover"
+                style={{
+                  padding: 24,
+                  display: 'flex',
+                  gap: 16,
+                  alignItems: 'flex-start',
+                  borderRadius: 18,
+                }}
+              >
+                <span
+                  style={{
+                    width: 44,
+                    height: 44,
+                    flex: '0 0 44px',
+                    borderRadius: 14,
+                    display: 'grid',
+                    placeItems: 'center',
+                    background: 'var(--ivory-warm)',
+                    color: 'var(--sage-deep)',
                   }}
                 >
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                      <span style={{ color: 'var(--gold-zari)', fontSize: '16px', letterSpacing: '2px' }}>
-                        {'★'.repeat(rev.rating)}
-                      </span>
-                      {rev.isVerifiedPurchase && (
-                        <span className="badge badge-success" style={{ fontSize: '10px' }}>
-                          Verified Purchase
-                        </span>
-                      )}
-                    </div>
-                    <p style={{ fontSize: '14px', lineHeight: 1.7, color: 'var(--charcoal-warm)', fontStyle: 'italic', marginBottom: '16px' }}>
-                      &ldquo;{rev.comment}&rdquo;
-                    </p>
-                  </div>
+                  <Icon size={21} />
+                </span>
+                <span>
+                  <strong style={{ display: 'block', color: 'var(--sage-dark)', fontSize: 15, marginBottom: 5 }}>
+                    {title}
+                  </strong>
+                  <span style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6 }}>{text}</span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
-                  <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
-                    <p style={{ fontWeight: 600, fontSize: '14px', color: 'var(--plum-royal)' }}>
-                      {rev.userName}
-                    </p>
-                    <p style={{ fontSize: '12px', color: 'var(--earth-taupe)' }}>
-                      Purchased: {rev.product.name}
-                    </p>
+      {/* STYLE CATEGORIES */}
+      <section style={{ padding: '10px 0 86px' }}>
+        <div className="container">
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20, alignItems: 'end', marginBottom: 28 }}>
+            <div>
+              <span className="font-brand" style={{ color: 'var(--champagne-deep)', fontSize: 10 }}>
+                Explore the edit
+              </span>
+              <h2 className="display-lg" style={{ color: 'var(--sage-dark)', marginTop: 6 }}>
+                Find your next look
+              </h2>
+            </div>
+            <Link href="/collections" className="btn btn-ghost btn-sm">
+              View collections <ArrowRight size={15} />
+            </Link>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, minmax(0,1fr))',
+              gap: 16,
+            }}
+          >
+            {styleCategories.map((item) => (
+              <Link
+                key={item.title}
+                href={item.href}
+                className="home-category-card"
+                style={{
+                  position: 'relative',
+                  minHeight: 420,
+                  overflow: 'hidden',
+                  borderRadius: 20,
+                  display: 'flex',
+                  alignItems: 'end',
+                  boxShadow: 'var(--shadow-md)',
+                }}
+              >
+                <Image src={item.image} alt={item.title} fill sizes="25vw" style={{ objectFit: 'cover' }} />
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg,transparent 35%,rgba(31,40,35,.78) 100%)',
+                  }}
+                />
+                <div style={{ position: 'relative', zIndex: 2, padding: 20, color: '#fff' }}>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 25, lineHeight: 1.1 }}>{item.title}</h3>
+                  <p style={{ fontSize: 12, opacity: .86, marginTop: 5 }}>{item.subtitle}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURED PRODUCTS */}
+      <section style={{ background: '#fff', padding: '82px 0' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', maxWidth: 680, margin: '0 auto 38px' }}>
+            <span className="font-brand" style={{ color: 'var(--champagne-deep)', fontSize: 10 }}>
+              Curated for Dhaagae
+            </span>
+            <h2 className="display-lg" style={{ color: 'var(--sage-dark)', marginTop: 6 }}>
+              Designs worth saving
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 10 }}>
+              Explore our latest looks, then open any piece to customize, wishlist, or add it to your bag.
+            </p>
+          </div>
+
+          {fallbackProducts.length > 0 ? (
+            <div
+              className="product-grid"
+              style={{
+                gridTemplateColumns: 'repeat(4, minmax(0,1fr))',
+                gap: 18,
+              }}
+            >
+              {fallbackProducts.slice(0, 8).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '70px 20px',
+                border: '1px dashed var(--border)',
+                borderRadius: 20,
+                color: 'var(--text-muted)',
+              }}
+            >
+              <Search size={28} style={{ margin: '0 auto 10px' }} />
+              <p>More curated designs are being added.</p>
+              <Link href="/shop" className="btn btn-primary btn-sm" style={{ marginTop: 16 }}>
+                Browse the shop
+              </Link>
+            </div>
+          )}
+
+          <div style={{ textAlign: 'center', marginTop: 34 }}>
+            <Link href="/shop" className="btn btn-secondary">
+              Explore all designs <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* AI DESIGN STORY */}
+      <section style={{ padding: '92px 0', background: 'var(--sage-dark)', color: '#fff' }}>
+        <div className="container">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0,1fr) minmax(360px,.8fr)',
+              gap: 60,
+              alignItems: 'center',
+            }}
+          >
+            <div>
+              <span className="font-brand" style={{ color: 'var(--champagne-light)', fontSize: 10 }}>
+                Create beyond the catalogue
+              </span>
+              <h2 className="display-lg" style={{ color: '#fff', margin: '10px 0 18px' }}>
+                Have an idea? Let AI shape it into a look.
+              </h2>
+              <p style={{ color: 'rgba(255,255,255,.74)', maxWidth: 620, fontSize: 15, lineHeight: 1.8 }}>
+                Start with a dress type, colour, fabric, neckline or occasion. Dhaagae's existing AI design
+                workflow turns those choices into a structured custom design you can save and revisit.
+              </p>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 28 }}>
+                <Link href="/design" className="btn btn-gold btn-lg">
+                  Open Design Studio <Wand2 size={17} />
+                </Link>
+                <Link
+                  href="/ai-assistant"
+                  className="btn btn-lg"
+                  style={{ color: '#fff', border: '1px solid rgba(255,255,255,.3)' }}
+                >
+                  Ask AI Stylist
+                </Link>
+              </div>
+            </div>
+
+            <div
+              style={{
+                padding: 26,
+                borderRadius: 24,
+                border: '1px solid rgba(255,255,255,.16)',
+                background: 'rgba(255,255,255,.055)',
+              }}
+            >
+              {[
+                ['01', 'Choose a direction', 'Frock, kurta set, festive wear or a completely new idea.'],
+                ['02', 'Define the details', 'Colour, fabric, sleeves, neckline, embroidery and occasion.'],
+                ['03', 'Save the result', 'Keep your generated concept in your account and continue refining it.'],
+              ].map(([number, title, text]) => (
+                <div
+                  key={number}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '42px 1fr',
+                    gap: 14,
+                    padding: '18px 0',
+                    borderBottom: number !== '03' ? '1px solid rgba(255,255,255,.1)' : 'none',
+                  }}
+                >
+                  <span style={{ color: 'var(--champagne-light)', fontFamily: 'var(--font-brand)', fontSize: 12 }}>
+                    {number}
+                  </span>
+                  <div>
+                    <h3 style={{ fontSize: 15, color: '#fff', marginBottom: 4 }}>{title}</h3>
+                    <p style={{ fontSize: 12, color: 'rgba(255,255,255,.62)', lineHeight: 1.6 }}>{text}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        </section>
-      )}
-    </div>
+        </div>
+      </section>
+
+      {/* TRUST / SEARCH CTA */}
+      <section style={{ padding: '76px 0', background: 'var(--ivory-warm)' }}>
+        <div className="container">
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 28,
+              flexWrap: 'wrap',
+            }}
+          >
+            <div>
+              <span className="font-brand" style={{ color: 'var(--champagne-deep)', fontSize: 10 }}>
+                Start anywhere
+              </span>
+              <h2 className="display-md" style={{ color: 'var(--sage-dark)', marginTop: 5 }}>
+                Shop a look, build a look, or ask AI.
+              </h2>
+              <p style={{ color: 'var(--text-muted)', marginTop: 6, fontSize: 13 }}>
+                Dhaagae keeps discovery, styling and custom design in one place.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <Link href="/shop" className="btn btn-primary">
+                Shop now
+              </Link>
+              <Link href="/design" className="btn btn-secondary">
+                Design with AI
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <style>{`
+        .home-category-card img { transition: transform .55s cubic-bezier(.16,1,.3,1); }
+        .home-category-card:hover img { transform: scale(1.055); }
+        @media (max-width: 1000px) {
+          main > section:first-child > .container > div { grid-template-columns: 1fr !important; }
+          .home-category-card { min-height: 360px !important; }
+        }
+        @media (max-width: 850px) {
+          .product-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+          .home-category-card { min-height: 320px !important; }
+        }
+        @media (max-width: 640px) {
+          main > section:first-child { padding-top: 32px !important; }
+          .home-category-card { min-height: 260px !important; }
+          .container { padding-left: 16px !important; padding-right: 16px !important; }
+        }
+      `}</style>
+    </main>
   );
 }
