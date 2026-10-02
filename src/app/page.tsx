@@ -433,7 +433,7 @@ export default async function HomePage() {
                 Have an idea? Let AI shape it into a look.
               </h2>
               <p style={{ color: 'rgba(255,255,255,.74)', maxWidth: 620, fontSize: 15, lineHeight: 1.8 }}>
-                Start with a dress type, colour, fabric, neckline or occasion. Dhaagae's existing AI design
+                Start with a dress type, colour, fabric, neckline or occasion. Dhaagae&apos;s existing AI design
                 workflow turns those choices into a structured custom design you can save and revisit.
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 28 }}>
