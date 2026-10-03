@@ -11,7 +11,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "node scripts/seed.js",
+    "db:seed": "node scripts/seed.js && node scripts/seed-outfits-20.js",
     "db:seed:outfits": "node scripts/seed-outfits-20.js",
     "db:studio": "prisma studio",
     "admin:create": "node scripts/create-admin.js",
