@@ -15,7 +15,7 @@ const outfits = [
     rating: 4.8, reviewCount: 18,
     shortDescription: 'A calm sage botanical print paired with a clean straight shirt and fluid culotte for effortless summer dressing.',
     description: 'Designed around a soft botanical print, this breathable lawn set balances relaxed tailoring with a polished Pakistani silhouette. The straight shirt has a neat neckline and the wide-leg culotte keeps the look easy for daytime wear.',
-    images: ['/products/floral-bloom-lawn-frock.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-01.svg']
   },
   {
     name: 'Ivory Bloom Cotton Kurta',
@@ -33,7 +33,7 @@ const outfits = [
     rating: 4.7, reviewCount: 12,
     shortDescription: 'An airy ivory kurta with delicate texture and tailored pants for a refined everyday wardrobe.',
     description: 'The soft ivory base keeps this look versatile while subtle textured detailing adds depth without becoming heavy. A straight kurta and tapered trouser create a clean silhouette suitable for workdays and casual gatherings.',
-    images: ['/products/lavender-bloom-kurta-set.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-02.svg']
   },
   {
     name: 'Terracotta Block Garden Suit',
@@ -51,7 +51,7 @@ const outfits = [
     rating: 4.8, reviewCount: 21,
     shortDescription: 'Earthy terracotta tones and artisan-inspired print work make this two-piece a warm everyday statement.',
     description: 'A warm terracotta palette gives the classic Pakistani lawn suit a contemporary feel. The printed shirt is paired with a straight trouser and restrained detailing for an outfit that feels expressive without being overly formal.',
-    images: ['/products/rose-garden-tiered-frock.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-03.svg']
   },
   {
     name: 'Powder Blue Linework Co-ord',
@@ -69,7 +69,7 @@ const outfits = [
     rating: 4.6, reviewCount: 9,
     shortDescription: 'A fresh powder-blue linework print with a relaxed longline shirt and wide-leg trouser.',
     description: 'This modern co-ord uses clean linear patterning to create a crisp, elongated look. The lightweight cambric construction makes it practical for warm days while the wide-leg trouser adds a contemporary finish.',
-    images: ['/products/teal-heritage-kurta-set.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-04.svg']
   },
   {
     name: 'Rose Quartz Embroidered Pret',
@@ -87,7 +87,7 @@ const outfits = [
     rating: 4.9, reviewCount: 26,
     shortDescription: 'Soft rose tones meet tonal embroidery in an elegant pret look made for intimate occasions.',
     description: 'The rose-quartz base is enriched with fine tonal embroidery around the neckline and hem. A long shirt and straight trouser keep the silhouette sophisticated while maintaining the ease of ready-to-wear dressing.',
-    images: ['/products/lavender-bloom-kurta-set.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-05.svg']
   },
   {
     name: 'Plum Threadwork Two-Piece',
@@ -105,7 +105,7 @@ const outfits = [
     rating: 4.8, reviewCount: 17,
     shortDescription: 'Deep plum cotton cambric with fine threadwork creates a rich yet wearable evening silhouette.',
     description: 'A saturated plum ground gives this two-piece a confident evening character. Delicate thread embroidery follows the neckline and hem while the A-line shirt falls over a streamlined cigarette trouser.',
-    images: ['/products/teal-heritage-kurta-set.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-06.svg']
   },
   {
     name: 'Mustard Heritage Kurta Set',
@@ -123,7 +123,7 @@ const outfits = [
     rating: 4.7, reviewCount: 13,
     shortDescription: 'A warm mustard kurta with heritage-inspired embroidery and an understated straight trouser.',
     description: 'Mustard brings energy to this structured cotton set, while restrained embroidery gives the kurta a traditional touch. The straight pants balance the silhouette and make the outfit easy to style with flats or embroidered khussas.',
-    images: ['/products/floral-bloom-lawn-frock.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-07.svg']
   },
   {
     name: 'Seafoam Print & Culotte Set',
@@ -141,7 +141,7 @@ const outfits = [
     rating: 4.8, reviewCount: 15,
     shortDescription: 'A breezy seafoam print paired with a fluid pleated culotte for fresh festive-day styling.',
     description: 'Soft seafoam and pale peach create a light, celebratory palette. The printed shirt is cut with a clean neckline and paired with a pleated culotte that gives the two-piece movement and a contemporary finish.',
-    images: ['/products/rose-garden-tiered-frock.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-08.svg']
   },
   {
     name: 'Emerald Noor Festive Set',
@@ -159,7 +159,7 @@ const outfits = [
     rating: 5.0, reviewCount: 31,
     shortDescription: 'Jewel-toned emerald, antique-gold detailing and an airy dupatta create a polished Eid ensemble.',
     description: 'This festive three-piece set pairs a rich emerald kurta with refined antique-gold embroidery. The matching trouser keeps the base elegant while the lightweight organza dupatta adds a graceful final layer for Eid gatherings.',
-    images: ['/products/teal-heritage-kurta-set.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-09.svg']
   },
   {
     name: 'Coral Jacquard Eid Kurta',
@@ -177,7 +177,7 @@ const outfits = [
     rating: 4.9, reviewCount: 23,
     shortDescription: 'A luminous coral jacquard kurta finished with champagne accents for an elegant Eid look.',
     description: 'The textured jacquard surface gives the coral kurta subtle dimension without relying on heavy embellishment. Champagne detailing and a soft chiffon dupatta complete the look with a refined festive mood.',
-    images: ['/products/lavender-bloom-kurta-set.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-10.svg']
   },
   {
     name: 'Midnight Luxe Winter Suit',
@@ -195,7 +195,7 @@ const outfits = [
     rating: 4.8, reviewCount: 19,
     shortDescription: 'A deep midnight winter ensemble with subtle silver accents for sophisticated evening occasions.',
     description: 'The dark navy base gives this winter suit a luxurious depth, while restrained silver detailing defines the neckline and cuffs. Its long straight silhouette is designed to feel formal without becoming cumbersome.',
-    images: ['/products/teal-heritage-kurta-set.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-11.svg']
   },
   {
     name: 'Champagne Organza Formal Set',
@@ -213,7 +213,7 @@ const outfits = [
     rating: 4.9, reviewCount: 27,
     shortDescription: 'Champagne raw silk and sheer organza details create an understated formal wedding look.',
     description: 'A warm champagne palette gives this formal set a refined glow. Structured raw silk is softened with sheer organza panels and a matching dupatta, creating a balanced silhouette for engagements and evening receptions.',
-    images: ['/products/lavender-bloom-kurta-set.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-12.svg']
   },
   {
     name: 'Ruby Zari Wedding Ensemble',
@@ -231,7 +231,7 @@ const outfits = [
     rating: 5.0, reviewCount: 34,
     shortDescription: 'Ruby raw silk with antique-gold inspired embroidery creates a dramatic wedding-ready ensemble.',
     description: 'The ruby base provides a rich canvas for fine gold-inspired embroidery concentrated around the shirt and borders. A flowing gharara and coordinated dupatta complete the traditional occasion silhouette with a polished modern cut.',
-    images: ['/products/rose-garden-tiered-frock.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-13.svg']
   },
   {
     name: 'Lilac Sharara Wedding Edit',
@@ -249,7 +249,7 @@ const outfits = [
     rating: 4.9, reviewCount: 22,
     shortDescription: 'Dusty lilac, pearl detailing and a fluid sharara create a soft contemporary wedding edit.',
     description: 'A muted lilac palette keeps the formal look romantic and modern. The short kurti carries delicate surface work while the flared sharara creates movement beneath a lightweight dupatta for wedding celebrations.',
-    images: ['/products/lavender-bloom-kurta-set.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-14.svg']
   },
   {
     name: 'Teal Antique-Gold Anarkali',
@@ -267,7 +267,7 @@ const outfits = [
     rating: 4.8, reviewCount: 29,
     shortDescription: 'Deep teal and antique-gold accents frame a graceful flared Anarkali silhouette.',
     description: 'This formal Anarkali combines a saturated teal base with antique-gold inspired embroidery along the bodice and flare. A clean trouser and sheer dupatta keep the overall look balanced and elegant.',
-    images: ['/products/teal-heritage-kurta-set.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-15.svg']
   },
   {
     name: 'Blush Rose Gharara Set',
@@ -285,7 +285,7 @@ const outfits = [
     rating: 4.7, reviewCount: 16,
     shortDescription: 'A blush rose peplum and fluid gharara form a soft occasion look with feminine movement.',
     description: 'The blush base is complemented by champagne detailing and a lightweight embroidered net dupatta. A fitted peplum balances the volume of the gharara, making the outfit suitable for intimate wedding functions.',
-    images: ['/products/rose-garden-tiered-frock.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-16.svg']
   },
   {
     name: 'Noir Ivory Minimal Co-ord',
@@ -303,7 +303,7 @@ const outfits = [
     rating: 4.8, reviewCount: 11,
     shortDescription: 'A black-and-ivory palette gives this relaxed Pakistani co-ord a sharp contemporary identity.',
     description: 'Clean contrast does the work in this minimal set, pairing an elongated ivory shirt with a black relaxed trouser. Small construction details keep the outfit polished while leaving room for statement accessories.',
-    images: ['/products/vintage-polka-dot-frock.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-17.svg']
   },
   {
     name: 'Olive Utility Kurta Co-ord',
@@ -321,7 +321,7 @@ const outfits = [
     rating: 4.6, reviewCount: 8,
     shortDescription: 'Utility-inspired details reinterpret the Pakistani kurta in a relaxed olive co-ord.',
     description: 'The olive cotton twill gives this contemporary set a structured but comfortable feel. Utility-style pockets and clean topstitching add character while the straight trouser keeps the silhouette wearable.',
-    images: ['/products/floral-bloom-lawn-frock.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-18.svg']
   },
   {
     name: 'Cobalt Azure Wide-Leg Set',
@@ -339,7 +339,7 @@ const outfits = [
     rating: 4.7, reviewCount: 14,
     shortDescription: 'Bold cobalt print and a wide-leg trouser give this lightweight set a confident summer finish.',
     description: 'Cobalt and azure tones create a graphic but wearable printed shirt. The wide-leg trouser echoes the relaxed proportions and keeps the look modern for daytime events and summer gatherings.',
-    images: ['/products/teal-heritage-kurta-set.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-19.svg']
   },
   {
     name: 'Peach Petal Statement Kurta',
@@ -357,7 +357,7 @@ const outfits = [
     rating: 4.9, reviewCount: 20,
     shortDescription: 'A soft peach statement kurta with fine neckline embroidery and a flowing pleated culotte.',
     description: 'Soft peach creates a fresh base for the fine embroidered neckline and cuffs. The pleated culotte adds movement and modern volume, making the outfit easy to dress up with traditional jewellery or keep understated.',
-    images: ['/products/rose-garden-tiered-frock.jpg'], imagePlaceholder: true
+    images: ['/products/dhaagae-outfit-20.svg']
   }
 ];
 
